@@ -1,6 +1,5 @@
 import argparse
 import os
-import util
 import torch
 
 
@@ -73,7 +72,7 @@ class BaseOptions():
 
         # save to the disk
         expr_dir = os.path.join(opt.checkpoints_dir, opt.name)
-        util.mkdirs(expr_dir)
+        os.makedirs(expr_dir, exist_ok=True)
         file_name = os.path.join(expr_dir, 'opt.txt')
         with open(file_name, 'wt') as opt_file:
             opt_file.write(message)
@@ -99,11 +98,16 @@ class BaseOptions():
             id = int(str_id)
             if id >= 0:
                 opt.gpu_ids.append(id)
-        if len(opt.gpu_ids) > 0:
+
+        # Check if CUDA is available and set the device accordingly
+        if torch.cuda.is_available() and len(opt.gpu_ids) > 0:
             torch.cuda.set_device(opt.gpu_ids[0])
+            print(f"Using GPU: {opt.gpu_ids[0]}")
+        else:
+            print("CUDA is not available or no GPU IDs specified. Running on CPU.")
+            opt.gpu_ids = []  # Empty list to indicate no GPU is being used
 
         # additional
-        #opt.classes = opt.classes.split(',')
         opt.rz_interp = opt.rz_interp.split(',')
         opt.blur_sig = [float(s) for s in opt.blur_sig.split(',')]
         opt.jpg_method = opt.jpg_method.split(',')

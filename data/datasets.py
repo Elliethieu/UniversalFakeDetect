@@ -56,6 +56,8 @@ class RealFakeDataset(Dataset):
         assert opt.data_label in ["train", "val"]
         #assert opt.data_mode in ["ours", "wang2020", "ours_wang2020"]
         self.data_label  = opt.data_label
+        self.opt = opt
+
         if opt.data_mode == 'ours':
             pickle_name = "train.pickle" if opt.data_label=="train" else "val.pickle"
             real_list = get_list( os.path.join(opt.real_list_path, pickle_name) )
@@ -86,18 +88,19 @@ class RealFakeDataset(Dataset):
         if opt.isTrain:
             crop_func = transforms.RandomCrop(opt.cropSize)
         elif opt.no_crop:
-            crop_func = transforms.Lambda(lambda img: img)
+            crop_func = transforms.Lambda(self.identity_transform)
         else:
             crop_func = transforms.CenterCrop(opt.cropSize)
 
         if opt.isTrain and not opt.no_flip:
             flip_func = transforms.RandomHorizontalFlip()
         else:
-            flip_func = transforms.Lambda(lambda img: img)
+            flip_func = transforms.Lambda(self.identity_transform)
+
         if not opt.isTrain and opt.no_resize:
-            rz_func = transforms.Lambda(lambda img: img)
+            rz_func = transforms.Lambda(self.identity_transform)
         else:
-            rz_func = transforms.Lambda(lambda img: custom_resize(img, opt))
+            rz_func = transforms.Lambda(self.custom_resize)
         
 
         stat_from = "imagenet" if opt.arch.lower().startswith("imagenet") else "clip"
@@ -107,7 +110,7 @@ class RealFakeDataset(Dataset):
             print ("using Official CLIP's normalization")
             self.transform = transforms.Compose([
                 rz_func,
-                transforms.Lambda(lambda img: data_augment(img, opt)),
+                transforms.Lambda(self.apply_data_augment),
                 crop_func,
                 flip_func,
                 transforms.ToTensor(),
@@ -117,6 +120,17 @@ class RealFakeDataset(Dataset):
             print ("Using CLIP 2B transform")
             self.transform = None # will be initialized in trainer.py
 
+      # Function to replace lambda img: img
+    def identity_transform(self, img):
+        return img
+
+    # Function to replace lambda img: data_augment(img, opt)
+    def apply_data_augment(self, img):
+        return data_augment(img, self.opt)
+
+    # Function to replace lambda img: custom_resize(img, opt)
+    def custom_resize(self, img):
+        return custom_resize(img, self.opt)
 
     def __len__(self):
         return len(self.total_list)
