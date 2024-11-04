@@ -59,17 +59,17 @@ class RealFakeDataset(Dataset):
         self.opt = opt
 
         if opt.data_mode == 'ours':
-            pickle_name = "train.pickle" if opt.data_label=="train" else "val.pickle"
-            real_list = get_list( os.path.join(opt.real_list_path, pickle_name) )
-            fake_list = get_list( os.path.join(opt.fake_list_path, pickle_name) )
+            if opt.real_pickle_path.endswith('.pickle') and opt.fake_pickle_path.endswith('.pickle'):
+                real_list = get_list(opt.real_pickle_path)
+                fake_list = get_list(opt.fake_pickle_path)
         elif opt.data_mode == 'wang2020':
             temp = 'train/progan' if opt.data_label == 'train' else 'test/progan'
             real_list = get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='0_real' )
             fake_list = get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='1_fake' )
         elif opt.data_mode == 'ours_wang2020':
-            pickle_name = "train.pickle" if opt.data_label=="train" else "val.pickle"
-            real_list = get_list( os.path.join(opt.real_list_path, pickle_name) )
-            fake_list = get_list( os.path.join(opt.fake_list_path, pickle_name) )
+            if opt.real_pickle_path.endswith('.pickle') and opt.fake_pickle_path.endswith('.pickle'):
+                real_list = get_list(opt.real_pickle_path)
+                fake_list = get_list(opt.fake_pickle_path)
             temp = 'train/progan' if opt.data_label == 'train' else 'test/progan'
             real_list += get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='0_real' )
             fake_list += get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='1_fake' )

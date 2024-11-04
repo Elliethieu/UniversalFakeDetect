@@ -253,8 +253,12 @@ if __name__ == '__main__':
 
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--real_path', type=str, default=None, help='dir name or a pickle')
-    parser.add_argument('--fake_path', type=str, default=None, help='dir name or a pickle')
+    #parser.add_argument('--real_path', type=str, default=None, help='dir name or a pickle')
+    #parser.add_argument('--fake_paths', type=str, nargs='+', default=None, help='List of paths to folders containing fake images or a pickle')
+    #parser.add_argument('--real_sample_size', type=int, default=None, help='Number of real images to sample')
+    #parser.add_argument('--fake_sample_sizes', type=int, nargs='+', help='List of sample sizes for each fake path')
+    #parser.add_argument('--seed', type=int, default=None, help='Random seed for reproducibility')
+    #parser.add_argument('--experiment_name', type=str, required=True, help='Name of the experiment for naming pickle files')
     parser.add_argument('--data_mode', type=str, default=None, help='wang2020 or ours')
     parser.add_argument('--max_sample', type=int, default=1000, help='only check this number of images for both fake/real')
 
@@ -270,6 +274,8 @@ if __name__ == '__main__':
 
     opt = parser.parse_args()
 
+    if len(opt.fake_paths) != len(opt.fake_sample_sizes):
+        raise ValueError("The number of fake_paths must match the number of fake_sample_sizes")
     
     if os.path.exists(opt.result_folder):
         shutil.rmtree(opt.result_folder)
