@@ -2,7 +2,7 @@ import os
 import time
 from tensorboardX import SummaryWriter
 
-from datasets_real_and_fake.pickle_utils import create_pickle_files_if_needed
+from datasets_Dalle_and_others.pickle_utils import create_pickle_files_if_needed
 from validate import validate
 from data import create_dataloader
 from networks.trainer import EarlyStopping
@@ -35,12 +35,12 @@ if __name__ == '__main__':
     val_opt = get_val_opt()
 
     #Generate pickle files if they do not exist
-    real_pickle_path, fake_pickle_path = create_pickle_files_if_needed(opt)
+    Dalle_pickle_path, others_pickle_path = create_pickle_files_if_needed(opt)
     # Update the options to use the generated pickle paths
-    opt.real_pickle_path = real_pickle_path
-    opt.fake_pickle_path = fake_pickle_path
-    val_opt.real_pickle_path = real_pickle_path #Please change it to the appropriate val_real_[experiment].pickle later
-    val_opt.fake_pickle_path = fake_pickle_path #Please change it to the appropriate val_fake_[experiment].pickle later
+    opt.Dalle_pickle_path = Dalle_pickle_path
+    opt.others_pickle_path = others_pickle_path
+    val_opt.Dalle_pickle_path = Dalle_pickle_path #Please change it to the appropriate val_Dalle_[experiment].pickle later
+    val_opt.others_pickle_path = others_pickle_path #Please change it to the appropriate val_others_[experiment].pickle later
 
  
     model = Trainer(opt)

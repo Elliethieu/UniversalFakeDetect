@@ -22,17 +22,17 @@ def save_paths_to_pickle(paths, output_pickle_path):
     with open(output_pickle_path, 'wb') as f:
         pickle.dump(paths, f)
 
-# Paths to real and fake image folders (assuming they are in the same directory as the script)
-real_image_base_dir = os.path.join(os.getcwd(), "real")
-fake_image_base_dir = os.path.join(os.getcwd(), "fake")
+# Paths to Dalle and others image folders (assuming they are in the same directory as the script)
+Dalle_image_base_dir = os.path.join(os.getcwd(), "Dalle")
+others_image_base_dir = os.path.join(os.getcwd(), "others")
 
-# Get the paths for real and fake images
-real_image_paths = get_image_paths_from_folders(real_image_base_dir)
-fake_image_paths = get_image_paths_from_folders(fake_image_base_dir)
+# Get the paths for Dalle and others images
+Dalle_image_paths = get_image_paths_from_folders(Dalle_image_base_dir)
+others_image_paths = get_image_paths_from_folders(others_image_base_dir)
 
 # Save the paths to pickle files
-save_paths_to_pickle(real_image_paths,  os.path.join(os.path.dirname(__file__), "real", "train.pickle"))
-save_paths_to_pickle(fake_image_paths,  os.path.join(os.path.dirname(__file__), "fake", "train.pickle"))
+save_paths_to_pickle(Dalle_image_paths,  os.path.join(os.path.dirname(__file__), "Dalle", "train.pickle"))
+save_paths_to_pickle(others_image_paths,  os.path.join(os.path.dirname(__file__), "others", "train.pickle"))
 
-print(f"Real images: {len(real_image_paths)}")
-print(f"Fake images: {len(fake_image_paths)}")
+print(f"Dalle images: {len(Dalle_image_paths)}")
+print(f"others images: {len(others_image_paths)}")

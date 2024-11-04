@@ -43,7 +43,7 @@ STD = {
 
 
 def find_best_threshold(y_true, y_pred):
-    "We assume first half is real 0, and the second half is fake 1"
+    "We assume first half is Dalle 0, and the second half is others 1"
 
     N = y_true.shape[0]
 
@@ -159,9 +159,9 @@ def get_list(path, must_contain=''):
 
 
 
-class RealFakeDataset(Dataset):
-    def __init__(self,  real_path, 
-                        fake_path, 
+class DalleOthersDataset(Dataset):
+    def __init__(self,  Dalle_path, 
+                        others_path, 
                         data_mode, 
                         max_sample,
                         arch,
@@ -173,25 +173,25 @@ class RealFakeDataset(Dataset):
         self.gaussian_sigma = gaussian_sigma
         
         # = = = = = = data path = = = = = = = = = # 
-        if type(real_path) == str and type(fake_path) == str:
-            real_list, fake_list = self.read_path(real_path, fake_path, data_mode, max_sample)
+        if type(Dalle_path) == str and type(others_path) == str:
+            Dalle_list, others_list = self.read_path(Dalle_path, others_path, data_mode, max_sample)
         else:
-            real_list = []
-            fake_list = []
-            for real_p, fake_p in zip(real_path, fake_path):
-                real_l, fake_l = self.read_path(real_p, fake_p, data_mode, max_sample)
-                real_list += real_l
-                fake_list += fake_l
+            Dalle_list = []
+            others_list = []
+            for Dalle_p, others_p in zip(Dalle_path, others_path):
+                Dalle_l, others_l = self.read_path(Dalle_p, others_p, data_mode, max_sample)
+                Dalle_list += Dalle_l
+                others_list += others_l
 
-        self.total_list = real_list + fake_list
+        self.total_list = Dalle_list + others_list
 
 
         # = = = = = =  label = = = = = = = = = # 
 
         self.labels_dict = {}
-        for i in real_list:
+        for i in Dalle_list:
             self.labels_dict[i] = 0
-        for i in fake_list:
+        for i in others_list:
             self.labels_dict[i] = 1
 
         stat_from = "imagenet" if arch.lower().startswith("imagenet") else "clip"
@@ -202,28 +202,28 @@ class RealFakeDataset(Dataset):
         ])
 
 
-    def read_path(self, real_path, fake_path, data_mode, max_sample):
+    def read_path(self, Dalle_path, others_path, data_mode, max_sample):
 
         if data_mode == 'wang2020':
-            real_list = get_list(real_path, must_contain='0_real')
-            fake_list = get_list(fake_path, must_contain='1_fake')
+            Dalle_list = get_list(Dalle_path, must_contain='0_Dalle')
+            others_list = get_list(others_path, must_contain='1_others')
         else:
-            real_list = get_list(real_path)
-            fake_list = get_list(fake_path)
+            Dalle_list = get_list(Dalle_path)
+            others_list = get_list(others_path)
 
 
         if max_sample is not None:
-            if (max_sample > len(real_list)) or (max_sample > len(fake_list)):
+            if (max_sample > len(Dalle_list)) or (max_sample > len(others_list)):
                 max_sample = 100
                 print("not enough images, max_sample falling to 100")
-            random.shuffle(real_list)
-            random.shuffle(fake_list)
-            real_list = real_list[0:max_sample]
-            fake_list = fake_list[0:max_sample]
+            random.shuffle(Dalle_list)
+            random.shuffle(others_list)
+            Dalle_list = Dalle_list[0:max_sample]
+            others_list = others_list[0:max_sample]
 
-        assert len(real_list) == len(fake_list)  
+        assert len(Dalle_list) == len(others_list)  
 
-        return real_list, fake_list
+        return Dalle_list, others_list
 
 
 
@@ -253,14 +253,14 @@ if __name__ == '__main__':
 
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    #parser.add_argument('--real_path', type=str, default=None, help='dir name or a pickle')
-    #parser.add_argument('--fake_paths', type=str, nargs='+', default=None, help='List of paths to folders containing fake images or a pickle')
-    #parser.add_argument('--real_sample_size', type=int, default=None, help='Number of real images to sample')
-    #parser.add_argument('--fake_sample_sizes', type=int, nargs='+', help='List of sample sizes for each fake path')
+    #parser.add_argument('--Dalle_path', type=str, default=None, help='dir name or a pickle')
+    #parser.add_argument('--others_paths', type=str, nargs='+', default=None, help='List of paths to folders containing others images or a pickle')
+    #parser.add_argument('--Dalle_sample_size', type=int, default=None, help='Number of Dalle images to sample')
+    #parser.add_argument('--others_sample_sizes', type=int, nargs='+', help='List of sample sizes for each others path')
     #parser.add_argument('--seed', type=int, default=None, help='Random seed for reproducibility')
     #parser.add_argument('--experiment_name', type=str, required=True, help='Name of the experiment for naming pickle files')
     parser.add_argument('--data_mode', type=str, default=None, help='wang2020 or ours')
-    parser.add_argument('--max_sample', type=int, default=1000, help='only check this number of images for both fake/real')
+    parser.add_argument('--max_sample', type=int, default=1000, help='only check this number of images for both others/Dalle')
 
     parser.add_argument('--arch', type=str, default='res50')
     parser.add_argument('--ckpt', type=str, default='./pretrained_weights/fc_weights.pth')
@@ -274,8 +274,8 @@ if __name__ == '__main__':
 
     opt = parser.parse_args()
 
-    if len(opt.fake_paths) != len(opt.fake_sample_sizes):
-        raise ValueError("The number of fake_paths must match the number of fake_sample_sizes")
+    if len(opt.others_paths) != len(opt.others_sample_sizes):
+        raise ValueError("The number of others_paths must match the number of others_sample_sizes")
     
     if os.path.exists(opt.result_folder):
         shutil.rmtree(opt.result_folder)
@@ -288,18 +288,18 @@ if __name__ == '__main__':
     model.eval()
     model.cuda()
 
-    if (opt.real_path == None) or (opt.fake_path == None) or (opt.data_mode == None):
+    if (opt.Dalle_path == None) or (opt.others_path == None) or (opt.data_mode == None):
         dataset_paths = DATASET_PATHS
     else:
-        dataset_paths = [ dict(real_path=opt.real_path, fake_path=opt.fake_path, data_mode=opt.data_mode) ]
+        dataset_paths = [ dict(Dalle_path=opt.Dalle_path, others_path=opt.others_path, data_mode=opt.data_mode) ]
 
 
 
     for dataset_path in (dataset_paths):
         set_seed()
 
-        dataset = RealFakeDataset(  dataset_path['real_path'], 
-                                    dataset_path['fake_path'], 
+        dataset = DalleOthersDataset(  dataset_path['Dalle_path'], 
+                                    dataset_path['others_path'], 
                                     dataset_path['data_mode'], 
                                     opt.max_sample, 
                                     opt.arch,

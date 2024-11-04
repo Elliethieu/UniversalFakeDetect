@@ -1,9 +1,9 @@
 # Ignore most in datasets folder except the pickle_utils.py
-datasets_real_and_fake/__pycache__
-datasets_real_and_fake/Dalle 3_hugging face_19k
-datasets_real_and_fake/face_19k
-datasets_real_and_fake/real
-datasets_real_and_fake/fake
+datasets_Dalle_and_others/__pycache__
+datasets_Dalle_and_others/Dalle 3_hugging face_19k
+ddatasets_Dalle_and_others/face_19k
+datasets_Dalle_and_others/Dalle
+datasets_Dalle_and_others/others
 
 # Ignore compiled Python files
 __pycache__/

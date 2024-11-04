@@ -51,7 +51,7 @@ def get_list(path, must_contain=''):
 
 
 
-class RealFakeDataset(Dataset):
+class DalleOthersDataset(Dataset):
     def __init__(self, opt):
         assert opt.data_label in ["train", "val"]
         #assert opt.data_mode in ["ours", "wang2020", "ours_wang2020"]
@@ -59,31 +59,31 @@ class RealFakeDataset(Dataset):
         self.opt = opt
 
         if opt.data_mode == 'ours':
-            if opt.real_pickle_path.endswith('.pickle') and opt.fake_pickle_path.endswith('.pickle'):
-                real_list = get_list(opt.real_pickle_path)
-                fake_list = get_list(opt.fake_pickle_path)
+            if opt.Dalle_pickle_path.endswith('.pickle') and opt.others_pickle_path.endswith('.pickle'):
+                Dalle_list = get_list(opt.Dalle_pickle_path)
+                others_list = get_list(opt.others_pickle_path)
         elif opt.data_mode == 'wang2020':
             temp = 'train/progan' if opt.data_label == 'train' else 'test/progan'
-            real_list = get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='0_real' )
-            fake_list = get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='1_fake' )
+            Dalle_list = get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='0_Dalle' )
+            others_list = get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='1_others' )
         elif opt.data_mode == 'ours_wang2020':
-            if opt.real_pickle_path.endswith('.pickle') and opt.fake_pickle_path.endswith('.pickle'):
-                real_list = get_list(opt.real_pickle_path)
-                fake_list = get_list(opt.fake_pickle_path)
+            if opt.Dalle_pickle_path.endswith('.pickle') and opt.others_pickle_path.endswith('.pickle'):
+                Dalle_list = get_list(opt.Dalle_pickle_path)
+                others_list = get_list(opt.others_pickle_path)
             temp = 'train/progan' if opt.data_label == 'train' else 'test/progan'
-            real_list += get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='0_real' )
-            fake_list += get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='1_fake' )
+            Dalle_list += get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='0_Dalle' )
+            others_list += get_list( os.path.join(opt.wang2020_data_path,temp), must_contain='1_others' )
 
 
 
         # setting the labels for the dataset
         self.labels_dict = {}
-        for i in real_list:
+        for i in Dalle_list:
             self.labels_dict[i] = 0
-        for i in fake_list:
+        for i in others_list:
             self.labels_dict[i] = 1
 
-        self.total_list = real_list + fake_list
+        self.total_list = Dalle_list + others_list
         shuffle(self.total_list)
         if opt.isTrain:
             crop_func = transforms.RandomCrop(opt.cropSize)
